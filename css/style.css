@@ -17,6 +17,7 @@
   --ink-disabled: #9aa0a6;
   --link: #4183c4;
   --key: #2d6b96;
+  --key-bg: #eaf1f8;
   --rule: #eee;
   --rule-strong: #d1d5da;
 
@@ -48,6 +49,7 @@
   --ink-disabled: #6e7681;
   --link: #4493f8;
   --key: #a5d6ff;
+  --key-bg: #0f2439;
   --rule: #30363d;
   --rule-strong: #484f58;
 
@@ -299,13 +301,23 @@ hr {
 
 .pub-list > li { margin-bottom: 20px; }
 
-/* line 1: bracketed venue key, then the title */
+/* line 1: venue-and-ranking pill, then the title */
 .pub-head { margin: 0 0 1px; line-height: 1.5; }
 
-.pub-key {
-  font-weight: 700;
+.pub-tag {
+  display: inline-block;
+  /* wide enough for the longest key, so every title starts at the same column */
+  min-width: 182px;
+  margin-right: 9px;
+  padding: 1px 10px;
+  font: 700 11.5px/17px Helvetica, Arial, sans-serif;
+  letter-spacing: 0.03em;
   color: var(--key);
+  text-align: center;
   white-space: nowrap;
+  vertical-align: baseline;
+  background: var(--key-bg);
+  border-radius: 999px;
 }
 
 .pub-title { font-weight: 700; }
@@ -314,7 +326,7 @@ hr {
 .pub-authors { margin: 0 0 1px; line-height: 1.5; }
 .pub-authors .me { font-weight: 700; }
 
-/* line 3: venue, then the links */
+/* line 3: venue, its ranking, then the links */
 .pub-where {
   margin: 0;
   color: var(--ink-soft);
@@ -323,9 +335,11 @@ hr {
 
 .pub-where strong { color: var(--ink); font-weight: 700; }
 
+.pub-links { margin-left: 8px; }
+
 .pub-links a,
 .pub-links .soon {
-  margin-left: 2px;
+  margin-left: 6px;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
   white-space: nowrap;
@@ -677,5 +691,6 @@ hr {
   .masonry-3, .masonry-2 { column-count: 1; }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-2 img { height: 200px; }
+  .pub-tag { display: block; width: max-content; min-width: 0; margin: 0 0 4px; }
   .skill-group .skill-label { display: block; margin-bottom: 4px; }
 }
