@@ -16,6 +16,7 @@
   --ink-faint: #6a737d;
   --ink-disabled: #9aa0a6;
   --link: #4183c4;
+  --key: #2d6b96;
   --rule: #eee;
   --rule-strong: #d1d5da;
 
@@ -46,6 +47,7 @@
   --ink-faint: #7d8590;
   --ink-disabled: #6e7681;
   --link: #4493f8;
+  --key: #a5d6ff;
   --rule: #30363d;
   --rule-strong: #484f58;
 
@@ -295,39 +297,35 @@ hr {
 
 .pub-list { margin: 0; padding: 0; list-style: none; }
 
-.pub-list > li {
-  margin-bottom: 16px;
-  padding-left: 0;
-}
+.pub-list > li { margin-bottom: 20px; }
 
-.venue {
-  display: inline-block;
-  margin-right: 6px;
-  padding: 2px 7px;
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 11.5px;
+/* line 1: bracketed venue key, then the title */
+.pub-head { margin: 0 0 1px; line-height: 1.5; }
+
+.pub-key {
   font-weight: 700;
-  line-height: 15px;
-  min-width: 104px;
-  color: var(--tag-ink);
-  text-align: center;
+  color: var(--key);
   white-space: nowrap;
-  vertical-align: 2px;
-  background: var(--tag);
-  border-radius: 3px;
 }
-
-.venue-preprint { background: var(--tag-muted); }
 
 .pub-title { font-weight: 700; }
 
-.pub-authors { }
+/* line 2: authors */
+.pub-authors { margin: 0 0 1px; line-height: 1.5; }
 .pub-authors .me { font-weight: 700; }
 
-.pub-venue { color: var(--ink-soft); font-style: italic; }
+/* line 3: venue, then the links */
+.pub-where {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.pub-where strong { color: var(--ink); font-weight: 700; }
 
 .pub-links a,
 .pub-links .soon {
+  margin-left: 2px;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 13px;
   white-space: nowrap;
@@ -336,7 +334,7 @@ hr {
 .pub-links .soon { color: var(--ink-disabled); }
 
 .pub-summary {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--ink-soft);
   font-size: 14.5px;
   line-height: 1.55;
@@ -662,7 +660,6 @@ hr {
 
   .column-side { margin-bottom: 26px; }
 
-  .venue { min-width: 0; }
 
   .profile-avatar { width: 112px; }
 
