@@ -980,7 +980,7 @@ hr {
   box-shadow: 0 0 10px rgba(143, 180, 255, 0.7);
 }
 
-/* K: numbered section headings; the rule draws in when the heading is in view */
+/* K: section heading rules draw in when the heading is in view */
 .fx .prose h2 { position: relative; border-bottom-color: transparent; }
 .fx .prose h2::after {
   content: "";
@@ -995,14 +995,6 @@ hr {
   transition: transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .fx .prose h2.is-drawn::after { transform: scaleX(1); }
-.h-index {
-  margin-right: 10px;
-  font: 600 12px Inter, Helvetica, Arial, sans-serif;
-  letter-spacing: 0.08em;
-  color: var(--key);
-  vertical-align: 3px;
-  opacity: 0.8;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .fx .prose h2::after { transform: scaleX(1); transition: none; }
@@ -1180,3 +1172,148 @@ html.fx::-webkit-scrollbar-thumb {
 }
 .fx .pub-list > li.is-spot::before,
 .fx .pub-list > li.is-spot::after { opacity: 1; }
+
+/* T: on load, content blocks rise in one after another (pure CSS, so the
+   page never shows, hides and re-shows content while scripts load) */
+@keyframes enter-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+.home .prose > p:nth-of-type(1),
+.home .prose > p:nth-of-type(2),
+.home .prose > p:nth-of-type(3),
+.home .prose > h2:first-of-type,
+.home .prose > ul:first-of-type,
+.home .column-side > .widget {
+  animation: enter-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.home .prose > p:nth-of-type(1)   { animation-delay: 0.12s; }
+.home .prose > p:nth-of-type(2)   { animation-delay: 0.23s; }
+.home .prose > p:nth-of-type(3)   { animation-delay: 0.34s; }
+.home .prose > h2:first-of-type   { animation-delay: 0.45s; }
+.home .prose > ul:first-of-type   { animation-delay: 0.56s; }
+.home .column-side > .widget:nth-child(1) { animation-delay: 0.67s; }
+.home .column-side > .widget:nth-child(2) { animation-delay: 0.78s; }
+.home .column-side > .widget:nth-child(3) { animation-delay: 0.89s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .home .prose > p:nth-of-type(1),
+  .home .prose > p:nth-of-type(2),
+  .home .prose > p:nth-of-type(3),
+  .home .prose > h2:first-of-type,
+  .home .prose > ul:first-of-type,
+  .home .column-side > .widget { animation: none; }
+}
+
+/* U: typing "beren" anywhere on the homepage shows an aurora and a line from Tolkien */
+.egg {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s, visibility 0s linear 0.6s;
+}
+.egg.is-on { opacity: 1; visibility: visible; transition: opacity 0.6s; }
+.egg-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 40% at 30% 20%, rgba(127, 224, 184, 0.55), transparent 70%),
+    radial-gradient(50% 40% at 70% 15%, rgba(195, 162, 245, 0.5), transparent 70%),
+    radial-gradient(70% 50% at 50% 30%, rgba(143, 180, 255, 0.45), transparent 70%),
+    rgba(8, 12, 24, 0.82);
+  animation: egg-sky 6s ease-in-out infinite alternate;
+}
+@keyframes egg-sky { to { filter: hue-rotate(25deg) brightness(1.1); } }
+.egg blockquote {
+  position: relative;
+  max-width: 640px;
+  margin: 0;
+  padding: 0 24px;
+  font: italic 400 30px/1.35 "Source Serif 4", Georgia, serif;
+  text-align: center;
+  color: #eef1ff;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+.egg cite {
+  display: block;
+  margin-top: 14px;
+  font: normal 600 12px Inter, Helvetica, Arial, sans-serif;
+  letter-spacing: 0.14em;
+  color: #b5c3ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .egg-sky { animation: none; }
+}
+
+/* V: "Hello world!" types itself out, followed by a blinking cursor */
+.fx .hello { color: var(--key); }
+.hello-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  border-radius: 1px;
+  background: linear-gradient(#7fe0b8, #8fb4ff, #c3a2f5);
+  animation: caret-blink 1.05s steps(1) infinite;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hello-caret { animation: none; }
+}
+
+/* W: a strip of gallery photos at the end of the main column; it scrolls on
+   its own once js/fx.js has doubled the row, and pauses on hover */
+.strip { margin-top: 34px; }
+.strip h2 a { color: inherit; }
+.strip-track {
+  overflow-x: auto;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.strip-row { display: flex; gap: 10px; width: max-content; }
+.strip-row a {
+  display: block;
+  flex: none;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 8px;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s;
+}
+.strip-row a:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 12px 24px -12px rgba(40, 44, 100, 0.45); }
+.strip-row img { display: block; width: auto; height: 100%; }
+.strip-track.is-looping { overflow: hidden; }
+.strip-track.is-looping .strip-row { animation: strip-scroll 60s linear infinite; }
+.strip:hover .strip-row,
+.strip:focus-within .strip-row { animation-play-state: paused; }
+@keyframes strip-scroll { to { transform: translateX(-50%); } }
+
+/* X: live time in Amsterdam; the dot's colour follows the real day and night */
+.lt-dot { position: relative; flex: 0 0 16px; height: 16px; }
+.lt-dot::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lt-color, #8fb4ff);
+  animation: lt-pulse 2.4s infinite;
+}
+@keyframes lt-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lt-color, #8fb4ff) 60%, transparent); }
+  70%  { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-dot::before { animation: none; }
+}

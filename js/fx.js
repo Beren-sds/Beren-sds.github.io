@@ -301,16 +301,9 @@
   window.addEventListener('resize', updateProgress);
   updateProgress();
 
-  /* ---- K: numbered section headings with a rule that draws in ---- */
+  /* ---- K: section heading rules draw in when the heading is in view ---- */
 
   var headings = Array.prototype.slice.call(document.querySelectorAll('.prose h2'));
-  headings.forEach(function (h, i) {
-    var num = document.createElement('span');
-    num.className = 'h-index';
-    num.setAttribute('aria-hidden', 'true');
-    num.textContent = (i < 9 ? '0' : '') + (i + 1);
-    h.insertBefore(num, h.firstChild);
-  });
   if (reduce || !('IntersectionObserver' in window)) {
     headings.forEach(function (h) { h.classList.add('is-drawn'); });
   } else {
@@ -379,4 +372,103 @@
     });
     li.addEventListener('pointerleave', function () { li.classList.remove('is-spot'); });
   });
+
+  /* ---- U: easter egg, type "beren" ---- */
+
+  var egg = document.createElement('div');
+  egg.className = 'egg';
+  egg.setAttribute('aria-hidden', 'true');
+  egg.innerHTML = '<div class="egg-sky"></div>' +
+    '<blockquote>Not all those who wander are lost.<cite>J.R.R. TOLKIEN</cite></blockquote>';
+  document.body.appendChild(egg);
+  var typed = '';
+  var eggTimer = null;
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+    if (e.target.closest && e.target.closest('input, textarea, [contenteditable]')) return;
+    typed = (typed + e.key.toLowerCase()).slice(-5);
+    if (typed !== 'beren') return;
+    egg.classList.add('is-on');
+    clearTimeout(eggTimer);
+    eggTimer = setTimeout(function () { egg.classList.remove('is-on'); }, 4200);
+  });
+
+  /* ---- V: "Hello world!" types itself out ---- */
+
+  var hello = document.querySelector('.hello');
+  if (hello) {
+    var greeting = hello.textContent;
+    var caret = document.createElement('span');
+    caret.className = 'hello-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    hello.parentNode.insertBefore(caret, hello.nextSibling);
+    if (!reduce) {
+      hello.setAttribute('aria-label', greeting);
+      hello.textContent = '';
+      var shown = 0;
+      var typeNext = function () {
+        hello.textContent = greeting.slice(0, ++shown);
+        if (shown < greeting.length) setTimeout(typeNext, 70 + Math.random() * 60);
+      };
+      setTimeout(typeNext, 450);
+    }
+  }
+
+  /* ---- W: the gallery strip loops; the copy is hidden from assistive tech ---- */
+
+  var stripTrack = document.querySelector('.strip-track');
+  if (stripTrack && !reduce) {
+    var stripRow = stripTrack.querySelector('.strip-row');
+    Array.prototype.slice.call(stripRow.children).forEach(function (a) {
+      var copy = a.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');
+      copy.setAttribute('tabindex', '-1');
+      copy.querySelector('img').alt = '';
+      stripRow.appendChild(copy);
+    });
+    stripTrack.classList.add('is-looping');
+  }
+
+  /* ---- X: live time in Amsterdam ----
+     Sunrise and sunset come from the NOAA sunrise equation for Amsterdam
+     (52.37 N, 4.90 E): daytime between them, evening from sunset until 22:00,
+     night otherwise. */
+
+  var contactList = document.querySelector('.contact-list');
+  if (contactList && window.Intl) {
+    var sunTimes = function (date, lat, lon) {
+      var rad = Math.PI / 180;
+      var J2000 = Date.UTC(2000, 0, 1, 12);
+      var n = Math.round((date.getTime() - J2000) / 864e5 - lon / 360);
+      var Jstar = n - lon / 360;
+      var M = (357.5291 + 0.98560028 * Jstar) % 360;
+      var C = 1.9148 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 0.0003 * Math.sin(3 * M * rad);
+      var L = (M + C + 180 + 102.9372) % 360;
+      var Jtransit = Jstar + 0.0053 * Math.sin(M * rad) - 0.0069 * Math.sin(2 * L * rad);
+      var dec = Math.asin(Math.sin(L * rad) * Math.sin(23.4397 * rad));
+      var cosH = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(dec)) / (Math.cos(lat * rad) * Math.cos(dec));
+      var H = Math.acos(Math.max(-1, Math.min(1, cosH))) / rad;
+      return { rise: J2000 + (Jtransit - H / 360) * 864e5, set: J2000 + (Jtransit + H / 360) * 864e5 };
+    };
+    var clock = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+
+    var timeRow = document.createElement('li');
+    timeRow.innerHTML = '<span><i class="lt-dot" aria-hidden="true"></i><span class="lt-text"></span></span>';
+    contactList.appendChild(timeRow);
+    var timeText = timeRow.querySelector('.lt-text');
+
+    var tick = function () {
+      var now = new Date();
+      var hm = clock.format(now);
+      var sun = sunTimes(now, 52.37, 4.90);
+      var phase;
+      if (now.getTime() >= sun.rise && now.getTime() < sun.set) phase = ['daytime', '#f5b94a'];
+      else if (now.getTime() >= sun.set && +hm.slice(0, 2) < 22 && +hm.slice(0, 2) >= 12) phase = ['evening', '#c3a2f5'];
+      else phase = ['night', '#8fb4ff'];
+      timeRow.style.setProperty('--lt-color', phase[1]);
+      timeText.textContent = hm + ' in Amsterdam, ' + phase[0];
+    };
+    tick();
+    setInterval(tick, 30000);
+  }
 })();
