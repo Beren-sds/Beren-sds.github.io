@@ -740,3 +740,88 @@ hr {
   .pub-head .pub-title { display: block; margin-top: 4px; }
   .skill-group .skill-label { display: block; margin-bottom: 4px; }
 }
+
+/* --- homepage effects (js/fx.js) ----------------------------------- */
+
+/* A: aurora behind the header */
+.fx .site-header { position: relative; overflow: hidden; isolation: isolate; }
+.aurora {
+  position: absolute;
+  inset: -40% -10%;
+  z-index: -2;
+  pointer-events: none;
+  filter: blur(34px) saturate(1.4);
+  opacity: 0.75;
+}
+.aurora i {
+  position: absolute;
+  display: block;
+  width: 46%;
+  height: 120%;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+.aurora i:nth-child(1) { left: 2%;  top: -10%; background: radial-gradient(closest-side, #7fe0b8, transparent); animation-duration: 17s; }
+.aurora i:nth-child(2) { left: 30%; top: 10%;  background: radial-gradient(closest-side, #8fb4ff, transparent); animation-duration: 23s; animation-delay: -6s; }
+.aurora i:nth-child(3) { left: 58%; top: -20%; background: radial-gradient(closest-side, #c3a2f5, transparent); animation-duration: 20s; animation-delay: -11s; }
+.aurora i:nth-child(4) { left: 78%; top: 5%;   background: radial-gradient(closest-side, #6fd3d0, transparent); animation-duration: 26s; animation-delay: -3s; }
+@keyframes aurora-drift {
+  0%   { transform: translate(-8%, 0) scaleY(0.8) rotate(-8deg); }
+  50%  { transform: translate(10%, -12%) scaleY(1.1) rotate(6deg); }
+  100% { transform: translate(-4%, 8%) scaleY(0.9) rotate(-2deg); }
+}
+:root[data-theme="dark"] .aurora { opacity: 0.55; }
+:root[data-theme="dark"] .aurora i { mix-blend-mode: screen; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora i { animation: none; }
+}
+
+/* B: masked-diffusion unmasking of the name and research interests */
+.dm-mask {
+  color: var(--key);
+  background: var(--key-bg);
+  border-radius: 2px;
+  font-family: Inter, Helvetica, Arial, sans-serif;
+  font-size: 0.78em;
+  letter-spacing: -0.02em;
+}
+
+/* C: publications fade in on scroll; paper figures tilt toward the cursor */
+.fx .pub-list > li { opacity: 0; transform: translateY(18px); }
+.fx .pub-list > li.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.fx .pub-teaser {
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.fx .pub-teaser::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.55), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.fx .pub-teaser.is-tilted { box-shadow: 0 14px 28px -12px rgba(40, 44, 100, 0.35); }
+.fx .pub-teaser.is-tilted::after { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx .pub-list > li { opacity: 1; transform: none; transition: none; }
+}
+
+/* D: attention network in the header; the cursor acts as the query */
+.attn {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
