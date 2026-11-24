@@ -208,7 +208,7 @@
     draw();
   }
 
-  /* ---- E: aurora ring around the profile photo ---- */
+  /* ---- E + Q: aurora ring around the profile photo; it flips on hover ---- */
 
   var avatar = document.querySelector('.profile-avatar');
   if (avatar) {
@@ -217,9 +217,17 @@
     var glow = document.createElement('span');
     glow.className = 'avatar-glow';
     glow.setAttribute('aria-hidden', 'true');
-    avatar.parentNode.insertBefore(ring, avatar);
+    var flip = document.createElement('span');
+    flip.className = 'avatar-flip';
+    var back = document.createElement('span');
+    back.className = 'avatar-back';
+    back.setAttribute('aria-hidden', 'true');
+    back.innerHTML = '<img src="images/albums/arctic/thumb/me-aurora.jpg" alt="" loading="lazy"><span>UNDER THE AURORA</span>';
+    avatar.parentNode.insertBefore(flip, avatar);
+    flip.appendChild(ring);
     ring.appendChild(glow);
     ring.appendChild(avatar);
+    ring.appendChild(back);
   }
 
   /* ---- I: snow over the page in dark mode ----
@@ -332,4 +340,43 @@
     }, { threshold: 1 });
     marks.forEach(function (m) { lit.observe(m); });
   }
+
+  /* ---- P: mountain ridge and aurora in the footer ---- */
+
+  var footer = document.querySelector('.site-footer');
+  if (footer) {
+    var ridge = document.createElement('div');
+    ridge.className = 'ridge';
+    ridge.setAttribute('aria-hidden', 'true');
+    ridge.innerHTML =
+      '<div class="ridge-sky"><i></i><i></i><i></i></div>' +
+      '<svg viewBox="0 0 1200 120" preserveAspectRatio="none">' +
+      '<path class="ridge-far" d="M0 120V82L70 60L130 74L210 34L280 66L350 48L430 72L520 26L580 50L640 40L720 68L800 30L860 54L930 44L1010 70L1090 40L1150 60L1200 50V120Z"/>' +
+      '<path class="ridge-near" d="M0 120V98L90 84L170 100L260 76L330 94L420 82L500 102L590 74L660 92L760 80L840 100L930 78L1010 94L1110 82L1200 96V120Z"/>' +
+      '</svg>' +
+      '<div class="ridge-band"></div>';
+    footer.insertBefore(ridge, footer.firstChild);
+  }
+
+  /* ---- R: sheen on CORE A* / CCF A venue pills, staggered ---- */
+
+  Array.prototype.slice.call(document.querySelectorAll('.pub-tag')).forEach(function (tag, i) {
+    if (/A\*/.test(tag.textContent)) {
+      tag.classList.add('is-top');
+      tag.style.setProperty('--sheen-delay', (i * 0.4) + 's');
+    }
+  });
+
+  /* ---- S: spotlight that follows the mouse over a paper ---- */
+
+  pubs.forEach(function (li) {
+    li.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var r = li.getBoundingClientRect();
+      li.style.setProperty('--sx', (e.clientX - r.left + 12) + 'px');
+      li.style.setProperty('--sy', (e.clientY - r.top + 10) + 'px');
+      li.classList.add('is-spot');
+    });
+    li.addEventListener('pointerleave', function () { li.classList.remove('is-spot'); });
+  });
 })();
