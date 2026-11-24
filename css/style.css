@@ -825,3 +825,112 @@ hr {
   height: 100%;
   pointer-events: none;
 }
+
+/* E: rotating aurora ring around the profile photo */
+@property --ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.avatar-ring {
+  position: relative;
+  display: block;
+  width: 62%;
+  margin: 6px auto 16px;
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 50%;
+}
+.avatar-ring::before,
+.avatar-ring .avatar-glow {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: conic-gradient(from var(--ring-angle), #7fe0b8, #8fb4ff, #c3a2f5, #6fd3d0, #7fe0b8);
+  animation: ring-spin 8s linear infinite;
+}
+.avatar-ring::before { inset: 0; filter: saturate(1.2); }
+.avatar-ring .avatar-glow { inset: -10px; z-index: -1; filter: blur(16px); opacity: 0.45; }
+.avatar-ring .profile-avatar {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  border: 3px solid var(--bg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.avatar-ring:hover .profile-avatar { transform: scale(1.04) rotate(-2deg); }
+@keyframes ring-spin { to { --ring-angle: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-ring::before,
+  .avatar-ring .avatar-glow { animation: none; }
+  .avatar-ring:hover .profile-avatar { transform: none; }
+}
+@media (max-width: 768px) {
+  .avatar-ring { width: 122px; }
+}
+
+/* G: news as a timeline; the newest item pulses and carries a NEW tag */
+.news-timeline { position: relative; padding-left: 18px; }
+.news-timeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  bottom: 14px;
+  width: 2px;
+  background: linear-gradient(var(--key), var(--rule-strong) 40%, var(--rule));
+}
+.news-timeline .news-item { position: relative; }
+.news-timeline .news-item::before {
+  content: "";
+  position: absolute;
+  left: -17px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--rule-strong);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.news-timeline .news-item:nth-child(2)::before { border-color: var(--key); }
+.news-timeline .news-item:first-child::before {
+  border-color: var(--key);
+  background: var(--key);
+  animation: news-pulse 2s infinite;
+}
+.news-timeline .news-item:first-child::after {
+  content: "NEW";
+  margin-left: 5px;
+  padding: 1px 5px;
+  font: 700 9px/1.4 Inter, Helvetica, Arial, sans-serif;
+  letter-spacing: 0.06em;
+  color: #fff;
+  vertical-align: 2px;
+  background: linear-gradient(90deg, #41489b, #8a63d2);
+  border-radius: 3px;
+}
+@keyframes news-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--key) 55%, transparent); }
+  70%  { box-shadow: 0 0 0 9px color-mix(in srgb, var(--key) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--key) 0%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-timeline .news-item:first-child::before { animation: none; }
+}
+
+/* H: theme switch reveal (js/site.js); the script animates the new snapshot */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }
+
+/* I: snow over the page in dark mode */
+.snow {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

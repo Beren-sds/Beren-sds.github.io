@@ -26,11 +26,33 @@
   if (themeBtn) {
     labelToggle();
 
-    themeBtn.addEventListener('click', function () {
-      var next = activeTheme() === 'dark' ? 'light' : 'dark';
+    var applyTheme = function (next) {
       root.setAttribute('data-theme', next);
       try { localStorage.setItem('theme-choice', next); } catch (e) {}
       labelToggle();
+    };
+
+    /* The new theme spreads out from the toggle in a growing circle.
+       Browsers without the View Transitions API, and visitors who prefer
+       reduced motion, get an instant switch. */
+    themeBtn.addEventListener('click', function () {
+      var next = activeTheme() === 'dark' ? 'light' : 'dark';
+      var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!document.startViewTransition || still) {
+        applyTheme(next);
+        return;
+      }
+      var r = themeBtn.getBoundingClientRect();
+      var x = r.left + r.width / 2;
+      var y = r.top + r.height / 2;
+      var radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      var transition = document.startViewTransition(function () { applyTheme(next); });
+      transition.ready.then(function () {
+        root.animate(
+          { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 650, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', pseudoElement: '::view-transition-new(root)' }
+        );
+      });
     });
   }
 

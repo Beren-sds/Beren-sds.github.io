@@ -207,4 +207,75 @@
     size();
     draw();
   }
+
+  /* ---- E: aurora ring around the profile photo ---- */
+
+  var avatar = document.querySelector('.profile-avatar');
+  if (avatar) {
+    var ring = document.createElement('span');
+    ring.className = 'avatar-ring';
+    var glow = document.createElement('span');
+    glow.className = 'avatar-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    avatar.parentNode.insertBefore(ring, avatar);
+    ring.appendChild(glow);
+    ring.appendChild(avatar);
+  }
+
+  /* ---- I: snow over the page in dark mode ----
+     The loop runs only while the dark theme is on and the tab is visible. */
+
+  if (!reduce && window.HTMLCanvasElement) {
+    var snow = document.createElement('canvas');
+    snow.className = 'snow';
+    snow.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(snow);
+
+    var sctx = snow.getContext('2d');
+    var sdpr = Math.min(2, window.devicePixelRatio || 1);
+    var SW = 0, SH = 0, flakes = [], snowing = false;
+
+    var snowSize = function () {
+      SW = window.innerWidth;
+      SH = window.innerHeight;
+      snow.width = SW * sdpr;
+      snow.height = SH * sdpr;
+      sctx.setTransform(sdpr, 0, 0, sdpr, 0, 0);
+      var n = Math.round(SW * SH / 9000);
+      while (flakes.length < n) {
+        flakes.push({
+          x: Math.random() * SW, y: Math.random() * SH,
+          r: 0.6 + Math.random() * 2.2, v: 0.25 + Math.random() * 0.8, phase: Math.random() * 6
+        });
+      }
+      flakes.length = n;
+    };
+
+    var fall = function (t) {
+      if (!snowing) return;
+      sctx.clearRect(0, 0, SW, SH);
+      flakes.forEach(function (f) {
+        f.y += f.v;
+        f.x += Math.sin(t / 1400 + f.phase) * 0.35;
+        if (f.y > SH + 4) { f.y = -4; f.x = Math.random() * SW; }
+        sctx.fillStyle = 'rgba(235, 240, 255, ' + (0.3 + f.r / 4.6).toFixed(3) + ')';
+        sctx.beginPath();
+        sctx.arc(f.x, f.y, f.r, 0, 2 * Math.PI);
+        sctx.fill();
+      });
+      requestAnimationFrame(fall);
+    };
+
+    var updateSnow = function () {
+      var want = root.getAttribute('data-theme') === 'dark' && !document.hidden;
+      if (want && !snowing) { snowing = true; requestAnimationFrame(fall); }
+      if (!want && snowing) { snowing = false; sctx.clearRect(0, 0, SW, SH); }
+    };
+
+    snowSize();
+    window.addEventListener('resize', snowSize);
+    document.addEventListener('visibilitychange', updateSnow);
+    new MutationObserver(updateSnow).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    updateSnow();
+  }
 })();
