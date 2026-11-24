@@ -15,7 +15,7 @@
   --ink-soft: #586069;
   --ink-faint: #6a737d;
   --ink-disabled: #9aa0a6;
-  --link: #4183c4;
+  --link: #41489b;
   --key: #41489b;
   --key-bg: #ecedfa;
   --rule: #eee;
@@ -47,7 +47,7 @@
   --ink-soft: #9198a1;
   --ink-faint: #7d8590;
   --ink-disabled: #6e7681;
-  --link: #4493f8;
+  --link: #b5b9f0;
   --key: #b5b9f0;
   --key-bg: #191b33;
   --rule: #30363d;
@@ -76,7 +76,9 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  font-family: Georgia, Avenir, Rockwell, SimSun, FZKai-Z03S, Helvetica, Tahoma, Arial, sans-serif;
+  font-family: "Source Serif 4", Georgia, SimSun, FZKai-Z03S, serif;
+  font-optical-sizing: auto;
+  font-feature-settings: "onum" 1;
   font-size: 16px;
   line-height: 1.6;
   color: var(--ink);
@@ -95,6 +97,8 @@ a:hover { text-decoration: underline; }
 }
 
 h1, h2, h3 { text-wrap: balance; }
+
+h2, h3, .pub-title, .profile-name { font-weight: 600; }
 
 img { max-width: 100%; }
 
@@ -299,18 +303,53 @@ hr {
 
 .pub-list { margin: 0; padding: 0; list-style: none; }
 
-.pub-list > li { margin-bottom: 20px; }
+/* a figure from the paper on the left, the three text lines on the right */
+.pub-list > li {
+  display: grid;
+  grid-template-columns: 176px 1fr;
+  column-gap: 18px;
+  margin-bottom: 26px;
+}
+
+.pub-list > li > p { grid-column: 2; }
+
+.pub-teaser {
+  grid-row: 1 / span 4;
+  align-self: start;
+  width: 176px;
+  height: 118px;
+  padding: 6px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--tint, #f4f5f7);
+  border-radius: 6px;
+}
+
+/* multiply turns the figure's white background into the card tint */
+.pub-teaser img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+/* the SEAL figure comes from a slide that already has this cream background */
+.teaser-seal { --tint: #f8f5ee; }
+.teaser-seal img { mix-blend-mode: normal; }
+.teaser-storymi { --tint: #eef5ef; }
+.teaser-scitext { --tint: #f2f0fa; }
+.teaser-trust { --tint: #edf3f9; }
+.teaser-arcbench { --tint: #fbf3ea; }
 
 /* line 1: venue-and-ranking pill, then the title */
 .pub-head { margin: 0 0 1px; line-height: 1.5; }
 
 .pub-tag {
   display: inline-block;
-  /* measured width of the longest key, so every title starts at the same column */
-  min-width: 190px;
   margin-right: 9px;
   padding: 1px 11px;
-  font: 700 11px/19px Helvetica, Arial, sans-serif;
+  font: 700 11px/19px Inter, Helvetica, Arial, sans-serif;
   letter-spacing: 0.03em;
   color: var(--key);
   text-align: center;
@@ -342,7 +381,7 @@ hr {
 .pub-links a,
 .pub-links .soon {
   margin-left: 6px;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Inter, Helvetica, Arial, sans-serif;
   font-size: 13px;
   white-space: nowrap;
 }
@@ -390,7 +429,7 @@ hr {
 .timeline .when {
   flex: 0 0 142px;
   color: var(--ink-soft);
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Inter, Helvetica, Arial, sans-serif;
   font-size: 13.5px;
   line-height: 1.75;
 }
@@ -416,7 +455,7 @@ hr {
   display: inline-block;
   margin: 0 4px 5px 0;
   padding: 1px 8px;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Inter, Helvetica, Arial, sans-serif;
   font-size: 12.5px;
   line-height: 18px;
   color: var(--ink-soft);
@@ -495,7 +534,7 @@ hr {
   display: inline-block;
   margin-right: 4px;
   padding: 2px 5px;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Inter, Helvetica, Arial, sans-serif;
   font-size: 11.5px;
   font-weight: 700;
   line-height: 14px;
@@ -592,7 +631,7 @@ hr {
 .lightbox-btn {
   position: absolute;
   padding: 0;
-  font: 400 34px/1 Helvetica, Arial, sans-serif;
+  font: 400 34px/1 Inter, Helvetica, Arial, sans-serif;
   color: #fff;
   background: none;
   border: 0;
@@ -611,7 +650,7 @@ hr {
   bottom: 14px;
   left: 0;
   right: 0;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: Inter, Helvetica, Arial, sans-serif;
   font-size: 13px;
   color: #ccc;
   text-align: center;
@@ -693,8 +732,11 @@ hr {
   .masonry-3, .masonry-2 { column-count: 1; }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-2 img { height: 200px; }
-  /* on a narrow screen the key sits on its own line above the title */
-  .pub-tag { min-width: 0; margin-right: 0; }
+  /* on a narrow screen the figure sits above the text and the key above the title */
+  .pub-list > li { grid-template-columns: 1fr; }
+  .pub-list > li > p { grid-column: 1; }
+  .pub-teaser { grid-row: auto; width: 100%; height: 170px; margin-bottom: 10px; }
+  .pub-tag { margin-right: 0; }
   .pub-head .pub-title { display: block; margin-top: 4px; }
   .skill-group .skill-label { display: block; margin-bottom: 4px; }
 }
