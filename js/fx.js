@@ -278,4 +278,58 @@
     new MutationObserver(updateSnow).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     updateSnow();
   }
+
+  /* ---- J: reading progress along the top edge ---- */
+
+  var bar = document.createElement('div');
+  bar.className = 'read-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  var updateProgress = function () {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.setProperty('--progress', max > 0 ? Math.min(1, window.scrollY / max) : 0);
+  };
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress);
+  updateProgress();
+
+  /* ---- K: numbered section headings with a rule that draws in ---- */
+
+  var headings = Array.prototype.slice.call(document.querySelectorAll('.prose h2'));
+  headings.forEach(function (h, i) {
+    var num = document.createElement('span');
+    num.className = 'h-index';
+    num.setAttribute('aria-hidden', 'true');
+    num.textContent = (i < 9 ? '0' : '') + (i + 1);
+    h.insertBefore(num, h.firstChild);
+  });
+  if (reduce || !('IntersectionObserver' in window)) {
+    headings.forEach(function (h) { h.classList.add('is-drawn'); });
+  } else {
+    var drawn = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-drawn');
+          drawn.unobserve(e.target);
+        }
+      });
+    }, { threshold: 1 });
+    headings.forEach(function (h) { drawn.observe(h); });
+  }
+
+  /* ---- N: highlighter sweep over key phrases, one after another ---- */
+
+  var marks = Array.prototype.slice.call(document.querySelectorAll('.hl'));
+  if (reduce || !('IntersectionObserver' in window)) {
+    marks.forEach(function (m) { m.classList.add('is-lit'); });
+  } else {
+    var lit = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        setTimeout(function () { e.target.classList.add('is-lit'); }, 300 + marks.indexOf(e.target) * 450);
+        lit.unobserve(e.target);
+      });
+    }, { threshold: 1 });
+    marks.forEach(function (m) { lit.observe(m); });
+  }
 })();
