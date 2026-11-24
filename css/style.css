@@ -1317,3 +1317,18 @@ html.fx::-webkit-scrollbar-thumb {
 @media (prefers-reduced-motion: reduce) {
   .lt-dot::before { animation: none; }
 }
+
+/* Phones: the sidebar comes first in the single-column layout, so it enters
+   first; the label on the back of the small avatar shrinks to fit */
+@media (max-width: 768px) {
+  .home .column-side > .widget:nth-child(1) { animation-delay: 0.08s; }
+  .home .column-side > .widget:nth-child(2) { animation-delay: 0.18s; }
+  .home .column-side > .widget:nth-child(3) { animation-delay: 0.28s; }
+  .avatar-back span { bottom: 28%; font-size: 7.5px; letter-spacing: 0.04em; }
+}
+
+/* Narrow phones: the IPA moves under the name so the theme and menu buttons
+   stay on the same row as the name */
+@media (max-width: 389px) {
+  .site-header h1 .ipa { display: block; margin-top: 2px; font-size: 0.55em; }
+}

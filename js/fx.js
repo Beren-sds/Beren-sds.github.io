@@ -92,7 +92,8 @@
 
   if (!reduce) {
     Array.prototype.slice.call(document.querySelectorAll('.pub-teaser')).forEach(function (card) {
-      card.addEventListener('mousemove', function (e) {
+      card.addEventListener('pointermove', function (e) {
+        if (e.pointerType !== 'mouse') return;
         var r = card.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width;
         var py = (e.clientY - r.top) / r.height;
@@ -101,7 +102,7 @@
         card.style.setProperty('--gy', py * 100 + '%');
         card.classList.add('is-tilted');
       });
-      card.addEventListener('mouseleave', function () {
+      card.addEventListener('pointerleave', function () {
         card.style.transform = '';
         card.classList.remove('is-tilted');
       });
