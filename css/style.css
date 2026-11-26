@@ -203,11 +203,34 @@ hr {
   fill: currentColor;
 }
 
-/* moon while the page is light (click for dark), sun while it is dark */
-.theme-toggle .icon-sun { display: none; }
+/* One icon that morphs: a crescent moon while the page is light (click for
+   dark), a sun while it is dark. The bite slides off the disc, the disc
+   shrinks and the rays turn outwards. Only transforms are animated, since
+   SVG geometry properties such as r and cx do not transition in Safari. */
+.theme-toggle .icon-theme { overflow: visible; }
+.icon-theme .tt-disc,
+.icon-theme .tt-bite,
+.icon-theme .tt-rays {
+  transform-origin: 12px 12px;
+  transition: transform 0.5s cubic-bezier(0.5, 1.5, 0.5, 1), opacity 0.3s;
+}
+.icon-theme .tt-rays {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0);
+}
+:root[data-theme="dark"] .icon-theme .tt-bite { transform: translate(12px, -9px); }
+:root[data-theme="dark"] .icon-theme .tt-disc { transform: scale(0.56); }
+:root[data-theme="dark"] .icon-theme .tt-rays { opacity: 1; transform: none; }
 
-:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
-:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+@media (prefers-reduced-motion: reduce) {
+  .icon-theme .tt-disc,
+  .icon-theme .tt-bite,
+  .icon-theme .tt-rays { transition: none; }
+}
 
 /* --- two-column layout -------------------------------------------- */
 
@@ -1331,4 +1354,152 @@ html.fx::-webkit-scrollbar-thumb {
    stay on the same row as the name */
 @media (max-width: 389px) {
   .site-header h1 .ipa { display: block; margin-top: 2px; font-size: 0.55em; }
+}
+
+/* Y: page-to-page transition; the header and side column stay put while the
+   main content lifts out and the next page rises in. Theme switches (H) add
+   .vt-theme so the whole page is clipped by the circle as one snapshot. */
+@view-transition { navigation: auto; }
+main { view-transition-name: page-main; }
+main:has(.column-main) { view-transition-name: none; }
+.column-main { view-transition-name: page-main; }
+.vt-theme main,
+.vt-theme .column-main { view-transition-name: none; }
+::view-transition-group(page-main) { animation: none; }
+::view-transition-old(page-main) { animation: vt-lift-out 0.22s cubic-bezier(0.4, 0, 1, 1) both; }
+::view-transition-new(page-main) { animation: vt-rise-in 0.38s 0.08s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes vt-lift-out { to { opacity: 0; transform: translateY(-16px); filter: blur(3px); } }
+@keyframes vt-rise-in { from { opacity: 0; transform: translateY(16px); filter: blur(2px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
+/* Z: aurora-edged pill on the nav; it rests on the current page and glides
+   to the hovered link (js/fx.js) */
+.fx .site-header-nav { position: relative; }
+.fx .site-header-nav a { position: relative; z-index: 1; padding: 3px 10px; margin: -3px -10px; }
+.fx .site-header-nav a.is-current { border-bottom: 0; }
+.fx .site-header-nav a:hover { text-decoration: none; }
+.nav-pill {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: 0;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--bg) 78%, transparent), color-mix(in srgb, var(--bg) 78%, transparent)) padding-box,
+    linear-gradient(100deg, #41489b, #8a63d2, #3fb8af) border-box;
+  box-shadow: 0 2px 14px rgba(138, 99, 210, 0.22);
+  pointer-events: none;
+  opacity: 0;
+}
+:root[data-theme="dark"] .nav-pill {
+  background:
+    linear-gradient(color-mix(in srgb, var(--bg) 70%, transparent), color-mix(in srgb, var(--bg) 70%, transparent)) padding-box,
+    linear-gradient(100deg, #8f96f0, #c3a2f5, #56d4c0) border-box;
+}
+.has-pill .nav-pill {
+  transition: transform 0.45s cubic-bezier(0.3, 1.35, 0.5, 1), width 0.45s cubic-bezier(0.3, 1.35, 0.5, 1), opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+  .nav-pill { display: none; }
+  .fx .site-header-nav a { padding: 9px 2px; margin: 0; }
+  .fx .site-header-nav a.is-current { border-bottom: 1px solid var(--rule); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-pill .nav-pill { transition: none; }
+}
+
+/* AA: links in the main text and News draw an aurora underline on hover */
+.fx .prose a:not(h2 a):not(.strip a),
+.fx .news-item a {
+  background: linear-gradient(90deg, #41489b, #8a63d2, #3fb8af) 0 100% / 0 1.5px no-repeat;
+  transition: background-size 0.5s cubic-bezier(0.6, 0, 0.2, 1), color 0.3s;
+}
+.fx .prose a:not(h2 a):not(.strip a):hover,
+.fx .news-item a:hover {
+  text-decoration: none;
+  background-size: 100% 1.5px;
+}
+.fx .prose a:not(h2 a):not(.strip a):not(.is-copied):hover,
+.fx .news-item a:hover { color: #6a4fc0; }
+:root[data-theme="dark"].fx .prose a:not(h2 a):not(.strip a),
+:root[data-theme="dark"].fx .news-item a {
+  background-image: linear-gradient(90deg, #8f96f0, #c3a2f5, #56d4c0);
+}
+:root[data-theme="dark"].fx .prose a:not(h2 a):not(.strip a):not(.is-copied):hover,
+:root[data-theme="dark"].fx .news-item a:hover { color: #d2b8ff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx .prose a,
+  .fx .news-item a { transition: none; }
+}
+
+/* AB: BibTeX copy toast and preview (js/fx.js) */
+.pub-links a.is-copied { color: var(--kw-f); }
+.bib-toast,
+.bib-peek {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), visibility 0s 0.25s;
+}
+.bib-toast.is-on,
+.bib-peek.is-on {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.bib-toast {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px 7px 10px;
+  font: 600 12px/1.2 Inter, Helvetica, Arial, sans-serif;
+  color: #fff;
+  white-space: nowrap;
+  background: linear-gradient(100deg, #41489b, #8a63d2);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(65, 72, 155, 0.35);
+  transform: translateY(6px);
+}
+.bib-toast svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.4; }
+.bib-toast::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: #554fb0;
+  transform: rotate(45deg);
+}
+.bib-peek {
+  max-width: min(520px, calc(100vw - 24px));
+  margin: 0;
+  padding: 10px 12px;
+  overflow: hidden;
+  font: 10.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--ink-soft);
+  text-overflow: ellipsis;
+  white-space: pre;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bib-toast,
+  .bib-peek { transform: none; }
 }

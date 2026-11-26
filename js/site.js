@@ -46,7 +46,9 @@
       var x = r.left + r.width / 2;
       var y = r.top + r.height / 2;
       var radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+      root.classList.add('vt-theme');
       var transition = document.startViewTransition(function () { applyTheme(next); });
+      transition.finished.finally(function () { root.classList.remove('vt-theme'); });
       transition.ready.then(function () {
         root.animate(
           { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },

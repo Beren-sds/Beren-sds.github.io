@@ -18,6 +18,35 @@
     header.insertBefore(aurora, header.firstChild);
   }
 
+  /* ---- Z: a pill that rests on the current nav item and glides to the
+     hovered or focused one; desktop layout only (CSS hides it on phones) ---- */
+  var nav = document.getElementById('site-nav');
+  if (nav) {
+    var pill = document.createElement('span');
+    pill.className = 'nav-pill';
+    pill.setAttribute('aria-hidden', 'true');
+    nav.insertBefore(pill, nav.firstChild);
+    var current = nav.querySelector('a.is-current');
+    var pillTo = function (link) {
+      if (!link) { pill.style.opacity = '0'; return; }
+      nav.querySelectorAll('a').forEach(function (a) { a.classList.toggle('is-pill', a === link); });
+      pill.style.opacity = '1';
+      pill.style.width = link.offsetWidth + 'px';
+      pill.style.transform = 'translateX(' + link.offsetLeft + 'px)';
+    };
+    pillTo(current);
+    requestAnimationFrame(function () { nav.classList.add('has-pill'); });
+    nav.addEventListener('pointerover', function (e) {
+      var a = e.target.closest('a');
+      if (a && e.pointerType === 'mouse') pillTo(a);
+    });
+    nav.addEventListener('pointerleave', function () { pillTo(current); });
+    nav.addEventListener('focusin', function (e) { if (e.target.matches('a')) pillTo(e.target); });
+    nav.addEventListener('focusout', function () { pillTo(current); });
+    window.addEventListener('resize', function () { pillTo(current); });
+    if (document.fonts) document.fonts.ready.then(function () { pillTo(current); });
+  }
+
   /* ---- C: publications fade in on scroll; figures tilt toward the cursor ---- */
 
   var pubs = Array.prototype.slice.call(document.querySelectorAll('.pub-list > li'));
@@ -305,6 +334,87 @@
     });
     li.addEventListener('pointerleave', function () { li.classList.remove('is-spot'); });
   });
+
+  /* ---- AB: [BibTeX] copies the entry to the clipboard and shows a toast;
+     hovering previews its first lines. Cmd/Ctrl/Shift-click still opens the
+     file, and so does a plain click where the Clipboard API is missing or
+     refuses the write. ---- */
+  var bibLinks = document.querySelectorAll('a[href$=".bib"]');
+  if (bibLinks.length && navigator.clipboard) {
+    var bibCache = {};
+    var bibText = function (href) {
+      if (!bibCache[href]) {
+        bibCache[href] = fetch(href).then(function (r) {
+          if (!r.ok) throw new Error(href + ' ' + r.status);
+          return r.text();
+        }).then(function (t) { return t.trim() + '\n'; });
+        bibCache[href].catch(function () { delete bibCache[href]; });
+      }
+      return bibCache[href];
+    };
+    var place = function (el, link, above) {
+      var r = link.getBoundingClientRect();
+      var left = Math.min(r.left + window.scrollX - 12, window.scrollX + document.documentElement.clientWidth - el.offsetWidth - 12);
+      el.style.left = Math.max(window.scrollX + 12, left) + 'px';
+      el.style.top = (above ? r.top + window.scrollY - el.offsetHeight - 10 : r.bottom + window.scrollY + 8) + 'px';
+    };
+
+    var toast = document.createElement('div');
+    toast.className = 'bib-toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>BibTeX copied to clipboard</span>';
+    document.body.appendChild(toast);
+    var peek = document.createElement('pre');
+    peek.className = 'bib-peek';
+    peek.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(peek);
+    var toastTimer, peekTimer;
+
+    bibLinks.forEach(function (link) {
+      link.dataset.label = link.textContent;
+      link.title = 'Copy BibTeX';
+      link.addEventListener('pointerenter', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        clearTimeout(peekTimer);
+        peekTimer = setTimeout(function () {
+          bibText(link.getAttribute('href')).then(function (t) {
+            var lines = t.split('\n');
+            peek.textContent = lines.slice(0, 6).join('\n') + (lines.length > 7 ? '\n  ...' : '');
+            peek.classList.add('is-on');
+            place(peek, link, false);
+          });
+        }, 250);
+      });
+      link.addEventListener('pointerleave', function () {
+        clearTimeout(peekTimer);
+        peek.classList.remove('is-on');
+      });
+      link.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        var href = link.getAttribute('href');
+        var text = bibText(href);
+        var write = window.ClipboardItem
+          ? navigator.clipboard.write([new ClipboardItem({ 'text/plain': text.then(function (t) { return new Blob([t], { type: 'text/plain' }); }) })])
+          : text.then(function (t) { return navigator.clipboard.writeText(t); });
+        write.then(function () {
+          peek.classList.remove('is-on');
+          link.textContent = '[Copied]';
+          link.classList.add('is-copied');
+          toast.classList.add('is-on');
+          place(toast, link, true);
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () {
+            toast.classList.remove('is-on');
+            bibLinks.forEach(function (l) {
+              l.classList.remove('is-copied');
+              l.textContent = l.dataset.label;
+            });
+          }, 2000);
+        }, function () { window.location.href = href; });
+      });
+    });
+  }
 
   /* ---- U: easter egg, type "beren" ---- */
 
